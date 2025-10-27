@@ -1,0 +1,42 @@
+Command line validations:
+
+gcloud config get-value project
+gcloud storage buckets describe gs://YOUR_PROJECT_ID-bucket
+gcloud services list --enabled --filter="name:dataflow.googleapis.com"
+gcloud iam service-accounts describe marssa@YOUR_PROJECT_ID.iam.gserviceaccount.com
+gcloud projects get-iam-policy YOUR_PROJECT_ID --flatten="bindings[]" --format="table(bindings.role, bindings.members)"
+bq --project_id=YOUR_PROJECT_ID show --format=prettyjson YOUR_PROJECT_ID:mars
+gcloud pubsub topics describe activities-topic
+gcloud pubsub subscriptions describe mars-activities
+
+
+Verification instructions
+
+Look at the project selector in the top‑bar of the Console (shows Project name / ID).
+URL: https://console.cloud.google.com/home?project=PROJECT_ID
+GCS bucket exists
+
+Console: Storage → Browser → check for PROJECT_ID-bucket
+URL: https://console.cloud.google.com/storage/browser/PROJECT_ID-bucket?project=PROJECT_ID
+Dataflow API enabled
+
+Console: APIs & Services → Dashboard → search for “Dataflow API” in the enabled list
+URL: https://console.cloud.google.com/apis/dashboard?project=PROJECT_ID
+Service account exists
+
+Console: IAM & Admin → Service Accounts → look for marssa@PROJECT_ID.iam.gserviceaccount.com
+URL: https://console.cloud.google.com/iam-admin/serviceaccounts?project=PROJECT_ID
+IAM bindings for marssa and user
+
+Console: IAM & Admin → IAM → inspect bindings for roles/editor, roles/dataflow.worker, roles/iam.serviceAccountUser and members list
+URL: https://console.cloud.google.com/iam-admin/iam?project=PROJECT_ID
+BigQuery dataset & tables
+
+Console: BigQuery → Explorer → expand your project → dataset “mars” → check tables activities and raw and their schema
+URL: https://console.cloud.google.com/bigquery?project=PROJECT_ID
+Pub/Sub topic and subscriptions
+
+Console: Pub/Sub → Topics (confirm activities-topic) and Subscriptions (confirm activities-subscription and mars-activities)
+URLs:
+Topics: https://console.cloud.google.com/cloudpubsub/topic/list?project=PROJECT_ID
+Subscriptions: https://console.cloud.google.com/cloudpubsub/subscription/list?project=PROJECT_ID
