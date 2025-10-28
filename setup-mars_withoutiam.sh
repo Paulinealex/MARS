@@ -46,8 +46,8 @@ gcloud pubsub subscriptions create activities-subscription --topic activities-to
 
 echo "Setup complete with limited permissions!"
 echo "Note: Some operations may fail due to sandbox restrictions."
-echo "You can now try running:"
-echo " - ./run-local.sh"
+echo "Starting MARS local processing pipeline..."
+bash -x "$(dirname "$0")/run-local.sh"
 echo " - ./run-cloud.sh"
 echo " - cd streaming && ./run-stream-local.sh"
 echo " - cd streaming && ./run-stream-cloud.sh"
