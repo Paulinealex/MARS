@@ -1,48 +1,43 @@
-# MAKE SURE GCP PROJECT IS SET
-# gcloud config set project PROJECT_ID
-echo $GOOGLE_CLOUD_PROJECT
+#!/usr/bin/env python3
+import apache_beam as beam
+import os
+import datetime
 
-# Define and setup service account permissions
-COMPUTE_SA="${GOOGLE_CLOUD_PROJECT}-compute@developer.gserviceaccount.com"
-echo "Setting up Compute Engine service account: ${COMPUTE_SA}"
+def processline(line):
+    yield line
 
-# Grant necessary roles to Compute Engine service account
-echo "Adding IAM bindings..."
-gcloud projects add-iam-policy-binding "${GOOGLE_CLOUD_PROJECT}" \
-    --member="serviceAccount:${COMPUTE_SA}" \
-    --role="roles/dataflow.worker" || echo "Warning: Could not add dataflow.worker role"
-sleep 1
+def run():
+    projectname = os.getenv('GOOGLE_CLOUD_PROJECT')
+    bucketname = os.getenv('GOOGLE_CLOUD_PROJECT') + '-bucket'
+    jobname = 'mars-job' + datetime.datetime.now().strftime("%Y%m%d%H%M")
+    region = 'us-central1'
 
-gcloud projects add-iam-policy-binding "${GOOGLE_CLOUD_PROJECT}" \
-    --member="serviceAccount:${COMPUTE_SA}" \
-    --role="roles/bigquery.dataEditor" || echo "Warning: Could not add bigquery.dataEditor role"
-sleep 1
+    # Use the specific service account email
+    service_account_email = "221165152849-compute@developer.gserviceaccount.com"
 
-gcloud projects add-iam-policy-binding "${GOOGLE_CLOUD_PROJECT}" \
-    --member="serviceAccount:${COMPUTE_SA}" \
-    --role="roles/storage.objectViewer" || echo "Warning: Could not add storage.objectViewer role"
-sleep 1
+    argv = [
+      '--runner=DataflowRunner',
+      '--project=' + projectname,
+      '--job_name=' + jobname,
+      '--region=' + region,
+      '--staging_location=gs://' + bucketname + '/staging/',
+      '--temp_location=gs://' + bucketname + '/temploc/',
+      '--max_num_workers=2',
+      '--machine_type=e2-standard-2',
+      '--service_account_email=' + service_account_email,
+      '--save_main_session'
+    ]
 
-# Grant current user permission to act as the service account
-USER_EMAIL=$(gcloud config get-value account)
-if [[ -n "${USER_EMAIL}" ]]; then
-    echo "Granting serviceAccountUser role to ${USER_EMAIL}"
-    gcloud projects add-iam-policy-binding "${GOOGLE_CLOUD_PROJECT}" \
-        --member="user:${USER_EMAIL}" \
-        --role="roles/iam.serviceAccountUser" || echo "Warning: Could not add iam.serviceAccountUser role"
-fi
+    p = beam.Pipeline(argv=argv)
+    input = 'gs://mars-sample/*.csv'
+    output = 'gs://' + bucketname + '/output/output'
 
-# Enable Dataflow API
-gcloud services enable dataflow.googleapis.com
+    (p
+     | 'Read Files' >> beam.io.ReadFromText(input)
+     | 'Process Lines' >> beam.FlatMap(lambda line: processline(line))
+     | 'Write Output' >> beam.io.WriteToText(output)
+     )
+    p.run()
 
-echo "Installing Python dependencies..."
-LOG="/tmp/mars-pip-install.log"
-sudo pip3 install -q -r requirements.txt >"$LOG" 2>&1 || {
-  echo "ERROR: pip install failed — showing last 100 lines of $LOG"
-  tail -n 100 "$LOG"
-  exit 1
-}
-
-python3 mars-cloud.py 
-read -p "Wait for Dataflow Job to Finish and then press enter"
-bq load mars.activities gs://"$GOOGLE_CLOUD_PROJECT""-bucket"/output/output*
+if __name__ == '__main__':
+    run()
