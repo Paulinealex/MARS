@@ -168,6 +168,7 @@ done
 
 echo ""
 # Executing the second script run-local.sh (absolute path)
+echo " Starting MARS cloud processing pipeline..."
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 bash -x "${SCRIPT_DIR}/run-cloud.sh"
 
