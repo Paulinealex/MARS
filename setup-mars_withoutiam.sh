@@ -19,31 +19,19 @@ gcloud storage buckets create "gs://${PROJECT_ID}-bucket" --soft-delete-duration
 
 # Enable Dataflow API with force disable first
 echo "Configuring Dataflow API..."
-gcloud services disable dataflow.googleapis.com --force
-gcloud services enable dataflow.googleapis.com
+gcloud services disable dataflow.googleapis.com --force || true
+gcloud services enable dataflow.googleapis.com || true
 
 # Create service account
 echo "Creating service account 'marssa'..."
 gcloud iam service-accounts create marssa || true
-sleep 1
 
-# Grant IAM roles
-echo "Granting IAM roles..."
-gcloud projects add-iam-policy-binding "${PROJECT_ID}" \
-    --member "serviceAccount:marssa@${PROJECT_ID}.iam.gserviceaccount.com" \
-    --role "roles/editor"
-sleep 1
-
-    gcloud projects add-iam-policy-binding "${PROJECT_ID}" \
-        --member "serviceAccount:marssa@${PROJECT_ID}.iam.gserviceaccount.com" \
-        --role "roles/dataflow.worker"
-    sleep 1
-
-    if [[ -n "${USER_EMAIL:-}" ]]; then
-        gcloud projects add-iam-policy-binding "${PROJECT_ID}" \
-            --member "user:${USER_EMAIL}" \
-            --role "roles/iam.serviceAccountUser"
-    fi
+# Note about IAM permissions
+echo "Note: IAM permissions could not be set due to sandbox restrictions."
+echo "In a production environment, the service account would need:"
+echo " - roles/editor"
+echo " - roles/dataflow.worker"
+echo " - roles/iam.serviceAccountUser"
 
 # Create BigQuery datasets and tables with schema
 echo "Creating BigQuery resources..."
@@ -56,8 +44,9 @@ echo "Setting up Pub/Sub..."
 gcloud pubsub topics create activities-topic || true
 gcloud pubsub subscriptions create activities-subscription --topic activities-topic || true
 
-echo "Setup complete!"
-echo "You can now run:"
+echo "Setup complete with limited permissions!"
+echo "Note: Some operations may fail due to sandbox restrictions."
+echo "You can now try running:"
 echo " - ./run-local.sh"
 echo " - ./run-cloud.sh"
 echo " - cd streaming && ./run-stream-local.sh"
