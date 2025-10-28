@@ -39,7 +39,10 @@ fi
 # Grant BigQuery Data Editor role to the service account
 echo "Granting BigQuery Data Editor role to ${SERVICE_ACCOUNT_EMAIL}..."
 bq mk --dataset --description "Dataset for MARS" "${PROJECT_ID}:mars" || true
-bq update --set-iam-policy "${PROJECT_ID}:mars" <<EOF
+
+# Create a temporary IAM policy file
+IAM_POLICY_FILE=$(mktemp)
+cat <<EOF > "${IAM_POLICY_FILE}"
 {
   "bindings": [
     {
@@ -51,6 +54,12 @@ bq update --set-iam-policy "${PROJECT_ID}:mars" <<EOF
   ]
 }
 EOF
+
+# Update the IAM policy for the dataset
+bq update --iam-policy "${PROJECT_ID}:mars" "${IAM_POLICY_FILE}"
+
+# Clean up the temporary IAM policy file
+rm "${IAM_POLICY_FILE}"
 
 echo "Granting IAM roles to ${SERVICE_ACCOUNT_EMAIL}..."
 gcloud projects add-iam-policy-binding "${PROJECT_ID}" \
