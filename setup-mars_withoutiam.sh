@@ -4,12 +4,24 @@ set -euo pipefail
 PROJECT_ARG="${1:-}"
 PROJECT_ID="${PROJECT_ARG:-${GOOGLE_CLOUD_PROJECT:-}}"
 
+# try gcloud config if still empty (requires gcloud installed & authenticated)
 if [[ -z "$PROJECT_ID" ]]; then
-    echo "Project has not been set! Please run:"
-    echo "   gcloud config set project PROJECT_ID"
-    echo "(where PROJECT_ID is the desired project)"
-    exit 1
+  PROJECT_ID="$(gcloud config get-value project 2>/dev/null || true)"
 fi
+
+# try metadata server (works on Cloud Shell / GCE / GKE)
+if [[ -z "$PROJECT_ID" ]]; then
+  if curl -s -H "Metadata-Flavor: Google" "http://metadata.google.internal/computeMetadata/v1/project/project-id" >/tmp/_projid 2>/dev/null; then
+    PROJECT_ID="$(cat /tmp/_projid 2>/dev/null || true)"
+    rm -f /tmp/_projid
+  fi
+fi
+
+if [[ -z "$PROJECT_ID" ]]; then
+  echo "Project has not been set! Provide PROJECT_ID as first arg, set GOOGLE_CLOUD_PROJECT, or run 'gcloud config set project PROJECT_ID'."
+  exit 1
+fi
+echo "Project Name: $PROJECT_ID"
 
 echo "Project Name: $PROJECT_ID"
 
