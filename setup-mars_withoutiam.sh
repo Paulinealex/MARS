@@ -131,15 +131,12 @@ cat <<EOF
 First-run GUI Validation Checklist (manual)
 Please verify these items in the Cloud Console for the first run of run-local.sh:
 
-1) Local output produced
-   - Confirm local output files are present in your repo 'output/' directory in Cloud Shell.
-
-2) GCS upload
+1) GCS upload
    - Confirm objects exist at: gs://${PROJECT_ID}-bucket/local/
      Console URL:
      https://console.cloud.google.com/storage/browser/${PROJECT_ID}-bucket/local/?project=${PROJECT_ID}
 
-3) BigQuery load
+2) BigQuery load
    - Confirm table 'mars.activities' exists and contains rows:
      Console URL:
      https://console.cloud.google.com/bigquery?project=${PROJECT_ID}
@@ -158,7 +155,10 @@ while true; do
 done
 
 echo ""
-echo "You can now run:"
-echo " - ./run-cloud.sh"
+# Executing the second script run-local.sh (absolute path)
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+bash -x "${SCRIPT_DIR}/run-cloud.sh"
+
+echo ""
 echo " - cd streaming && ./run-stream-local.sh"
 echo " - cd streaming && ./run-stream-cloud.sh"
