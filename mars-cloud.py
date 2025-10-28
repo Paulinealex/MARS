@@ -2,7 +2,6 @@
 import apache_beam as beam
 import os
 import datetime
-import google.auth
 
 def processline(line):
     yield line
@@ -13,9 +12,8 @@ def run():
     jobname = 'mars-job' + datetime.datetime.now().strftime("%Y%m%d%H%M")
     region = 'us-central1'
 
-    # Fetch the Compute Engine default service account
-    _, project_id = google.auth.default()
-    service_account_email = f"{project_id}-compute@developer.gserviceaccount.com"
+    # Use the specific service account email
+    service_account_email = "221165152849-compute@developer.gserviceaccount.com"
 
     # https://cloud.google.com/dataflow/docs/reference/pipeline-options
     argv = [
