@@ -2,6 +2,7 @@
 import apache_beam as beam
 import os
 import datetime
+import google.auth
 
 def processline(line):
     yield line
@@ -11,6 +12,10 @@ def run():
     bucketname = os.getenv('GOOGLE_CLOUD_PROJECT') + '-bucket'
     jobname = 'mars-job' + datetime.datetime.now().strftime("%Y%m%d%H%M")
     region = 'us-central1'
+
+    # Fetch the Compute Engine default service account
+    _, project_id = google.auth.default()
+    service_account_email = f"{project_id}-compute@developer.gserviceaccount.com"
 
     # https://cloud.google.com/dataflow/docs/reference/pipeline-options
     argv = [
@@ -22,7 +27,7 @@ def run():
       '--temp_location=gs://' + bucketname + '/temploc/',
       '--max_num_workers=2',
       '--machine_type=e2-standard-2',
-      '--service_account_email=marssa@' + projectname + ".iam.gserviceaccount.com",
+      '--service_account_email=' + service_account_email,
       '--save_main_session'
     ]
 
