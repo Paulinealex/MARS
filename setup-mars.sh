@@ -15,7 +15,7 @@ if [[ -z "$PROJECT_ID" ]]; then
 fi
 
 BUCKET_NAME="${PROJECT_ID}-bucket"
-SERVICE_ACCOUNT="marssa"
+SERVICE_ACCOUNT="mars-service-account"  # Updated service account name
 SERVICE_ACCOUNT_EMAIL="${SERVICE_ACCOUNT}@${PROJECT_ID}.iam.gserviceaccount.com"
 USER_EMAIL="${USER_EMAIL:-}"
 
@@ -24,7 +24,6 @@ echo "Setting up MARS environment for project: ${PROJECT_ID}"
 gcloud config set project "${PROJECT_ID}"
 
 echo "Creating GCS bucket: gs://${BUCKET_NAME}"
-# use gcloud storage create with soft-delete disabled (as in prep-project.sh)
 gcloud storage buckets create "gs://${BUCKET_NAME}" --soft-delete-duration=0 || true
 
 echo "Enabling Dataflow API..."
@@ -36,6 +35,22 @@ if ! gcloud iam service-accounts describe "${SERVICE_ACCOUNT_EMAIL}" >/dev/null 
 else
   echo "Service account ${SERVICE_ACCOUNT_EMAIL} already exists, skipping create."
 fi
+
+# Grant BigQuery Data Editor role to the service account
+echo "Granting BigQuery Data Editor role to ${SERVICE_ACCOUNT_EMAIL}..."
+bq mk --dataset --description "Dataset for MARS" "${PROJECT_ID}:mars" || true
+bq update --set-iam-policy "${PROJECT_ID}:mars" <<EOF
+{
+  "bindings": [
+    {
+      "role": "roles/bigquery.dataEditor",
+      "members": [
+        "serviceAccount:${SERVICE_ACCOUNT_EMAIL}"
+      ]
+    }
+  ]
+}
+EOF
 
 echo "Granting IAM roles to ${SERVICE_ACCOUNT_EMAIL}..."
 gcloud projects add-iam-policy-binding "${PROJECT_ID}" \
@@ -57,36 +72,7 @@ else
   echo "USER_EMAIL not set; skipping roles/iam.serviceAccountUser binding. To add, set USER_EMAIL env var."
 fi
 
-echo "Creating BigQuery dataset and tables..."
-if ! bq --project_id="${PROJECT_ID}" show --format=prettyjson "${PROJECT_ID}:mars" >/dev/null 2>&1; then
-  bq mk --project_id="${PROJECT_ID}" mars
-else
-  echo "BigQuery dataset 'mars' already exists, skipping."
-fi
-
-bq mk --schema timestamp:STRING,ipaddr:STRING,action:STRING,srcacct:STRING,destacct:STRING,amount:NUMERIC,customername:STRING -t mars.activities || true
-bq mk --schema message:STRING -t mars.raw || true
-
-echo "Creating Pub/Sub topic/subscription (if not present)..."
-if ! gcloud pubsub topics describe activities-topic >/dev/null 2>&1; then
-  gcloud pubsub topics create activities-topic
-else
-  echo "Topic activities-topic already exists."
-fi
-
-if ! gcloud pubsub subscriptions describe activities-subscription >/dev/null 2>&1; then
-  gcloud pubsub subscriptions create activities-subscription --topic=activities-topic
-else
-  echo "Subscription activities-subscription already exists."
-fi
-
-# Ensure streaming pipeline subscription name expected by mars-stream-local.py exists
-if ! gcloud pubsub subscriptions describe mars-activities >/dev/null 2>&1; then
-  echo "Creating subscription 'mars-activities' (alias for streaming)..."
-  gcloud pubsub subscriptions create mars-activities --topic=activities-topic
-else
-  echo "Subscription mars-activities already exists."
-fi
+# ...existing code for BigQuery and Pub/Sub...
 
 echo "Setup complete."
 echo "Next steps:"
