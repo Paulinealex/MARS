@@ -7,4 +7,4 @@ gcloud storage cp gs://mars-sample/*.csv sample/
 rm -R output
 python3 mars-local.py
 gcloud storage cp output/* gs://$GOOGLE_CLOUD_PROJECT"-bucket/local/"
-bq load --replace=true mars.activities gs://$GOOGLE_CLOUD_PROJECT"-bucket/local/*" 
+bq load --replace=true mars.activities gs://$GOOGLE_CLOUD_PROJECT"-bucket/local/*"
