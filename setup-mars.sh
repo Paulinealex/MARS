@@ -55,8 +55,8 @@ cat <<EOF > "${IAM_POLICY_FILE}"
 }
 EOF
 
-# Update the IAM policy for the dataset using the correct flag
-bq set-iam "${PROJECT_ID}:mars" "${IAM_POLICY_FILE}"
+# Update the IAM policy for the dataset using the correct command
+bq set-iam-policy "${PROJECT_ID}:mars" "${IAM_POLICY_FILE}"
 
 # Clean up the temporary IAM policy file
 rm "${IAM_POLICY_FILE}"
