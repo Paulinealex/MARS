@@ -90,8 +90,8 @@ else
     gcloud pubsub subscriptions describe activities-subscription >/dev/null 2>&1 || gcloud pubsub subscriptions create activities-subscription --topic activities-topic >/dev/null 2>&1 && echo "OK: activities-subscription created."
 fi
 
-echo "Setup complete with limited permissions!"
-echo "Note: Some operations may fail due to sandbox restrictions."
+echo "Setup completed!"
+echo ""
 echo ""
 echo "Starting MARS local processing pipeline..."
 
