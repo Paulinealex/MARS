@@ -191,9 +191,9 @@ echo ""
 echo "Starting MARS streaming pipeline..."
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
-# Start streaming pipeline in background
+# Start streaming pipeline on local VM
 bash "${SCRIPT_DIR}/streaming/run-stream-local.sh" &
-STREAM_PID=$!
+STREAM_LOCAL_PID=$!
 
 echo ""
 echo "Waiting 10 seconds for streaming pipeline to initialize..."
@@ -208,7 +208,7 @@ echo "============================================================"
 echo "✓ Sample data published successfully!"
 echo "============================================================"
 echo ""
-echo "Streaming pipeline is running in background (PID: ${STREAM_PID})"
+echo "Streaming pipeline is running in background (PID: ${STREAM_LOCAL_PID})"
 echo "Messages are being processed and written to BigQuery tables."
 echo ""
 echo "============================================================"
@@ -232,7 +232,7 @@ echo "To publish more messages:"
 echo "  bash streaming/publish-sample-data.sh [NUM_MESSAGES]"
 echo ""
 echo "To stop the streaming pipeline:"
-echo "  kill ${STREAM_PID}"
+echo "  kill ${STREAM_LOCAL_PID}"
 echo "  (Or press Ctrl+C in the streaming terminal)"
 echo ""
 echo "============================================================"
@@ -276,6 +276,7 @@ echo "============================================================"
 
 echo ""
 # Executing the streaming on cloud
-echo "Starting MARS cloud streaming pipeline..."
+echo "Starting MARS streaming pipeline on cloud..."
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-bash -x "${SCRIPT_DIR}/streaming/run-stream-cloud.sh"
+bash -x "${SCRIPT_DIR}/streaming/run-stream-cloud.sh" &
+STREAM_CLOUD_PID=$!
