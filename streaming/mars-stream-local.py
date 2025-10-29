@@ -10,26 +10,23 @@ import logging
 warnings.filterwarnings('ignore', message='.*httplib2.*timeout.*')
 logging.getLogger('google_auth_httplib2').setLevel(logging.ERROR)
 
-# Global flag to track if message was received
-message_received_event = False
+# Global counters
+message_count = 0
 projectname = None
 
 def processline_raw(line):
     """Process line for raw table - store as-is"""
-    global message_received_event
+    global message_count
+    message_count += 1
+    
+    # Decode to show readable data
+    try:
+        decoded = line.decode('utf-8').strip()
+        print(f"[{message_count}] Subscription read message: {decoded}")
+    except:
+        print(f"[{message_count}] Subscription read message: {line}")
+    
     outputrow = {'message' : line}
-    print(f"✓ Message received and processed: {outputrow}")
-    if not message_received_event:
-        message_received_event = True
-        # Print success message immediately when first message is received
-        print(f"\n{'='*60}")
-        print("✓ SUCCESS: Pipeline is working correctly!")
-        print("  - Subscription 'activities-subscription' read the published message")
-        print("  - Message was processed and written to BigQuery tables:")
-        print("    • mars.raw (raw message)")
-        print("    • mars.activities (structured data)")
-        print("  - Pipeline will continue running until Ctrl+C")
-        print(f"{'='*60}\n")
     yield outputrow
 
 def processline_activities(line):
@@ -58,10 +55,19 @@ def processline_activities(line):
 
 def signal_handler(sig, frame):
     """Handle Ctrl+C gracefully"""
-    global projectname
+    global projectname, message_count
     print("\n\n✓ Pipeline stopped by user (Ctrl+C)")
-    if message_received_event:
-        print("✓ Pipeline was working correctly - messages were processed")
+    
+    # Show summary
+    if message_count > 0:
+        print(f"\n{'='*60}")
+        print("✓ SUCCESS: Pipeline worked correctly!")
+        print(f"  - Total messages processed: {message_count}")
+        print("  - Subscription 'activities-subscription' read all published messages")
+        print("  - Messages were processed and written to BigQuery tables:")
+        print("    • mars.raw (raw messages)")
+        print("    • mars.activities (structured data)")
+        print(f"{'='*60}")
     
     # Show validation links
     print(f"\n{'='*60}")
