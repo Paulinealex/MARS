@@ -187,11 +187,11 @@ echo "Starting MARS local processing pipeline..."
 # SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 # bash "${SCRIPT_DIR}/run-cloud.sh"
 
-# echo ""
-# # Executing the streaming local script
-# echo " Starting MARS cloud processing pipeline..."
-# SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-# bash "${SCRIPT_DIR}/streaming/run-stream-local.sh"
+echo ""
+# Executing the streaming local script
+echo " Starting MARS cloud processing pipeline..."
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+bash "${SCRIPT_DIR}/streaming/run-stream-local.sh"
 
 echo ""
 # Executing the streaming cloud script
