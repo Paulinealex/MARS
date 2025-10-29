@@ -12,6 +12,7 @@ logging.getLogger('google_auth_httplib2').setLevel(logging.ERROR)
 
 # Global flag to track if message was received
 message_received_event = False
+projectname = None
 
 def processline_raw(line):
     """Process line for raw table - store as-is"""
@@ -57,12 +58,40 @@ def processline_activities(line):
 
 def signal_handler(sig, frame):
     """Handle Ctrl+C gracefully"""
+    global projectname
     print("\n\n✓ Pipeline stopped by user (Ctrl+C)")
     if message_received_event:
         print("✓ Pipeline was working correctly - messages were processed")
+    
+    # Show validation links
+    print(f"\n{'='*60}")
+    print("Validation Resources:")
+    print(f"\n1. Pub/Sub Topic (activities-topic):")
+    print(f"   https://console.cloud.google.com/cloudpubsub/topic/detail/activities-topic?project={projectname}")
+    print(f"\n2. Pub/Sub Subscription (activities-subscription):")
+    print(f"   https://console.cloud.google.com/cloudpubsub/subscription/detail/activities-subscription?project={projectname}")
+    print(f"\n3. BigQuery Table - mars.raw (raw messages):")
+    print(f"   https://console.cloud.google.com/bigquery?project={projectname}&ws=!1m5!1m4!4m3!1s{projectname}!2smars!3sraw")
+    print(f"\n4. BigQuery Table - mars.activities (structured data):")
+    print(f"   https://console.cloud.google.com/bigquery?project={projectname}&ws=!1m5!1m4!4m3!1s{projectname}!2smars!3sactivities")
+    print(f"{'='*60}\n")
+    
+    # Ask for validation confirmation
+    try:
+        response = input("Have you verified the data in BigQuery tables? (y/n): ").strip().lower()
+        if response in ['y', 'yes']:
+            print("\n✓ Validation confirmed. Streaming pipeline completed successfully.")
+        elif response in ['n', 'no']:
+            print("\n⚠ Validation not confirmed. Please check the BigQuery tables above.")
+        else:
+            print("\n⚠ Invalid response.")
+    except (EOFError, KeyboardInterrupt):
+        print("\n")
+    
     sys.exit(0)
 
 def run():
+    global projectname
     projectname = os.getenv('GOOGLE_CLOUD_PROJECT')
     
     argv = [
@@ -81,18 +110,13 @@ def run():
     print("Starting Beam Job - streaming pipeline")
     print(f"\n{'='*60}")
     print("Pipeline Configuration:")
+    print(f"  Project: {projectname}")
     print(f"  Topic: {topic_name}")
-    print(f"    → https://console.cloud.google.com/cloudpubsub/topic/detail/{topic_name}?project={projectname}")
     print(f"  Subscription: activities-subscription")
-    print(f"    → https://console.cloud.google.com/cloudpubsub/subscription/detail/activities-subscription?project={projectname}")
-    print(f"  BigQuery Tables:")
-    print(f"    • mars.raw")
-    print(f"      → https://console.cloud.google.com/bigquery?project={projectname}&ws=!1m5!1m4!4m3!1s{projectname}!2smars!3sraw")
-    print(f"    • mars.activities")
-    print(f"      → https://console.cloud.google.com/bigquery?project={projectname}&ws=!1m5!1m4!4m3!1s{projectname}!2smars!3sactivities")
+    print(f"  BigQuery Tables: mars.raw, mars.activities")
     print(f"{'='*60}")
     print("\nWaiting for messages from Pub/Sub topic...")
-    print("Press Ctrl+C to stop the pipeline")
+    print("Press Ctrl+C to stop the pipeline and view validation links")
     print(f"{'='*60}\n")
     
     # Read messages from Pub/Sub
