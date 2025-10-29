@@ -13,15 +13,15 @@ import logging
 warnings.filterwarnings('ignore', message='.*httplib2.*timeout.*')
 logging.getLogger('google_auth_httplib2').setLevel(logging.ERROR)
 
-# Global flag to track if message was received
-message_received = False
+# Global flag to track if message was received (use threading.Event for thread safety)
+message_received_event = threading.Event()
 pipeline_result = None
 
 def processline(line):
-    global message_received
+    global message_received_event
     outputrow = {'message' : line}
     print(f"✓ Message received and processed: {outputrow}")
-    message_received = True
+    message_received_event.set()  # Thread-safe way to signal message received
     yield outputrow
 
 def publish_test_message(topic_name, delay_seconds=5):
@@ -42,12 +42,14 @@ def publish_test_message(topic_name, delay_seconds=5):
     except Exception as e:
         print(f"\n✗ Error publishing test message: {e}")
 
-def timeout_handler(pipeline_result, timeout_seconds=30):
+def timeout_handler(timeout_seconds=30):
     """Wait for timeout and check if message was received"""
-    global message_received
-    time.sleep(timeout_seconds)
+    global message_received_event
     
-    if message_received:
+    # Wait up to timeout_seconds for the event to be set
+    received = message_received_event.wait(timeout=timeout_seconds)
+    
+    if received:
         print(f"\n{'='*60}")
         print("✓ SUCCESS: Pipeline is working correctly!")
         print("  - Subscription read the published message")
@@ -68,7 +70,7 @@ def timeout_handler(pipeline_result, timeout_seconds=30):
 def signal_handler(sig, frame):
     """Handle Ctrl+C gracefully"""
     print("\n\n✓ Pipeline stopped by user (Ctrl+C)")
-    if message_received:
+    if message_received_event.is_set():
         print("✓ Pipeline was working correctly - messages were processed")
     sys.exit(0)
 
@@ -108,7 +110,7 @@ def run():
     # Start timeout checker thread
     timeout_thread = threading.Thread(
         target=timeout_handler,
-        args=(None, 30),
+        args=(30,),
         daemon=True
     )
     timeout_thread.start()
