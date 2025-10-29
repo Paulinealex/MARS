@@ -239,10 +239,43 @@ echo "============================================================"
 echo "✓ MARS setup and initial streaming completed!"
 echo "============================================================"
 echo ""
-
+# Prompt for validation confirmation before proceeding to cloud streaming
+echo "============================================================"
+while true; do
+    read -r -p "Have you verified the streaming data in BigQuery tables? (y/n): " VALIDATION_RESPONSE
+    case "$VALIDATION_RESPONSE" in
+        [Yy]* ) 
+            echo "✓ Validation confirmed. Proceeding to cloud streaming..."
+            break 
+            ;;
+        [Nn]* ) 
+            echo "⚠ Validation not confirmed. Please check the BigQuery tables above."
+            echo "You can still proceed, but please verify the data."
+            read -r -p "Do you want to proceed anyway? (y/n): " PROCEED_ANYWAY
+            case "$PROCEED_ANYWAY" in
+                [Yy]* ) 
+                    echo "Proceeding to cloud streaming..."
+                    break 
+                    ;;
+                [Nn]* ) 
+                    echo "Exiting. Run the cloud streaming manually when ready:"
+                    echo "  bash streaming/run-stream-cloud.sh"
+                    exit 0 
+                    ;;
+                * ) 
+                    echo "Please answer y or n." 
+                    ;;
+            esac
+            ;;
+        * ) 
+            echo "Please answer y or n." 
+            ;;
+    esac
+done
+echo "============================================================"
 
 echo ""
 # Executing the streaming on cloud
-echo " Starting MARS cloud processing pipeline..."
+echo "Starting MARS cloud streaming pipeline..."
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 bash "${SCRIPT_DIR}/streaming/run-stream-cloud.sh"
