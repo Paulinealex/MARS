@@ -42,14 +42,11 @@ def publish_test_message(topic_name, delay_seconds=5):
     except Exception as e:
         print(f"\n✗ Error publishing test message: {e}")
 
-def timeout_handler(delay_before_check, timeout_seconds=20):
-    """Wait for pipeline to start, then check if message was received"""
+def timeout_handler(timeout_seconds=15):
+    """Wait for message to be received within timeout period"""
     global message_received_event
     
-    # Wait for pipeline to initialize and test message to be published
-    time.sleep(delay_before_check)
-    
-    # Now wait up to timeout_seconds for the event to be set
+    # Wait up to timeout_seconds for the event to be set (this blocks until event or timeout)
     received = message_received_event.wait(timeout=timeout_seconds)
     
     if received:
@@ -98,7 +95,7 @@ def run():
     print(f"Writing to BigQuery table: {outputtable}")
     print("\n" + "="*60)
     print("Publishing a test message in 5 seconds to verify pipeline...")
-    print("Checking pipeline status after 15 seconds...")
+    print("Waiting up to 15 seconds for message to be processed...")
     print("Press Ctrl+C to stop the pipeline")
     print("="*60 + "\n")
     
@@ -110,11 +107,10 @@ def run():
     )
     test_thread.start()
     
-    # Start timeout checker thread (waits 10 seconds before starting to check, then waits 20 more)
-    # This gives time for: pipeline init (3-5s) + test message publish (5s) + processing (2-3s)
+    # Start timeout checker thread immediately - it will wait for the event
     timeout_thread = threading.Thread(
         target=timeout_handler,
-        args=(10, 20),
+        args=(15,),
         daemon=True
     )
     timeout_thread.start()
