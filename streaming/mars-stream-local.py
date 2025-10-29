@@ -44,7 +44,7 @@ def publish_test_message(topic_name, delay_seconds=5):
             timeout=10
         )
         if result.returncode == 0:
-            print(f"\n✓ Test message published successfully to {topic_name}")
+            print(f"\n✓ Test message published successfully to topic: {topic_name}")
         else:
             print(f"\n✗ Failed to publish test message: {result.stderr}")
     except Exception as e:
@@ -73,13 +73,19 @@ def run():
     outputtable = projectname + ":mars.raw"
     topic_name = "activities-topic"
     
-    print("Starting Beam Job - next step start the pipeline")
-    print(f"Listening for messages on subscription: {subscription}")
-    print(f"Writing to BigQuery table: {outputtable}")
-    print("\n" + "="*60)
-    print("Publishing a test message in 5 seconds to verify pipeline...")
+    print("Starting Beam Job - streaming pipeline")
+    print(f"\n{'='*60}")
+    print("Pipeline Configuration:")
+    print(f"  Topic: {topic_name}")
+    print(f"    → https://console.cloud.google.com/cloudpubsub/topic/detail/{topic_name}?project={projectname}")
+    print(f"  Subscription: activities-subscription")
+    print(f"    → https://console.cloud.google.com/cloudpubsub/subscription/detail/activities-subscription?project={projectname}")
+    print(f"  BigQuery Table: mars.raw")
+    print(f"    → https://console.cloud.google.com/bigquery?project={projectname}&ws=!1m5!1m4!4m3!1s{projectname}!2smars!3sraw")
+    print(f"{'='*60}")
+    print("\nPublishing a test message in 5 seconds to verify pipeline...")
     print("Press Ctrl+C to stop the pipeline")
-    print("="*60 + "\n")
+    print(f"{'='*60}\n")
     
     # Start background thread to publish test message (publishes at 5 seconds)
     test_thread = threading.Thread(
