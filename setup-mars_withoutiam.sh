@@ -80,6 +80,7 @@ gcloud pubsub subscriptions describe activities-subscription >/dev/null 2>&1 || 
 
 echo "Setup complete with limited permissions!"
 echo "Note: Some operations may fail due to sandbox restrictions."
+echo ""
 echo "Starting MARS local processing pipeline..."
 
 # Executing the first script run-local.sh
