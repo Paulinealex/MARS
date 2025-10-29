@@ -81,15 +81,13 @@ echo "Attempting to subscribe to moonbank-mars topic..."
 if gcloud pubsub subscriptions create mars-activities --topic projects/moonbank-mars/topics/activities 2>/dev/null; then
     echo "OK: Subscribed to shared moonbank-mars topic via mars-activities subscription"
 else
-    echo "Note: Could not access moonbank-mars topic. Creating local topic and subscriptions..."
+    echo "Note: Could not access moonbank-mars topic. Creating local topic and subscription..."
     
     # Create local topic if moonbank-mars is not accessible
     gcloud pubsub topics describe activities-topic >/dev/null 2>&1 || gcloud pubsub topics create activities-topic >/dev/null 2>&1 && echo "OK: activities-topic created."
     
-    # Create both subscriptions pointing to local topic
+    # Create activities-subscription pointing to local topic
     gcloud pubsub subscriptions describe activities-subscription >/dev/null 2>&1 || gcloud pubsub subscriptions create activities-subscription --topic activities-topic >/dev/null 2>&1 && echo "OK: activities-subscription created."
-    
-    gcloud pubsub subscriptions describe mars-activities >/dev/null 2>&1 || gcloud pubsub subscriptions create mars-activities --topic activities-topic >/dev/null 2>&1 && echo "OK: mars-activities subscription created."
 fi
 
 echo "Setup complete with limited permissions!"
@@ -193,8 +191,8 @@ echo " Starting MARS cloud processing pipeline..."
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 bash "${SCRIPT_DIR}/streaming/run-stream-local.sh"
 
-echo ""
-# Executing the streaming cloud script
-echo " Starting MARS cloud processing pipeline..."
-SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-bash "${SCRIPT_DIR}/streaming/run-stream-cloud.sh"
+# echo ""
+# # Executing the streaming cloud script
+# echo " Starting MARS cloud processing pipeline..."
+# SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+# bash "${SCRIPT_DIR}/streaming/run-stream-cloud.sh"

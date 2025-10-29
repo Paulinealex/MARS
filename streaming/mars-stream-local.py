@@ -56,10 +56,10 @@ def timeout_handler(pipeline_result, timeout_seconds=30):
         print(f"{'='*60}\n")
     else:
         print(f"\n{'='*60}")
-        print("⚠ TIMEOUT: No messages received after {timeout_seconds} seconds")
+        print(f"⚠ TIMEOUT: No messages received after {timeout_seconds} seconds")
         print("  - Pipeline is running but no messages arrived")
         print("  - Check if:")
-        print("    1. Subscription 'mars-activities' exists")
+        print("    1. Subscription 'activities-subscription' exists")
         print("    2. Topic has messages published to it")
         print("    3. Subscription is pulling from correct topic")
         print("  - Pipeline will continue running until Ctrl+C")
@@ -84,7 +84,7 @@ def run():
     signal.signal(signal.SIGINT, signal_handler)
 
     p = beam.Pipeline(argv=argv)
-    subscription = "projects/" + projectname + "/subscriptions/mars-activities"
+    subscription = "projects/" + projectname + "/subscriptions/activities-subscription"
     outputtable = projectname + ":mars.raw"
     topic_name = "activities-topic"
     

@@ -9,4 +9,4 @@ sudo pip3 install -q -r requirements.txt >"$LOG" 2>&1 || {
   tail -n 100 "$LOG"
   exit 1
 }
-python3 mars-stream-cloud.py
+python3 "${SCRIPT_DIR}/mars-stream-cloud.py"
