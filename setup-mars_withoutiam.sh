@@ -182,15 +182,19 @@ echo "Starting MARS local processing pipeline..."
 # done
 
 # echo ""
-# # Executing the second script run-local.sh (absolute path)
+# # Executing the batch cloud script
 # echo " Starting MARS cloud processing pipeline..."
 # SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 # bash "${SCRIPT_DIR}/run-cloud.sh"
 
+# echo ""
+# # Executing the streaming local script
+# echo " Starting MARS cloud processing pipeline..."
+# SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+# bash "${SCRIPT_DIR}/streaming/run-stream-local.sh"
+
 echo ""
-# Executing the second script run-local.sh (absolute path)
+# Executing the streaming cloud script
 echo " Starting MARS cloud processing pipeline..."
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-bash -x "${SCRIPT_DIR}/streaming/run-stream-local.sh"
-
-echo " - cd streaming && ./run-stream-cloud.sh"
+bash "${SCRIPT_DIR}/streaming/run-stream-cloud.sh"

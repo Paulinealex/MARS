@@ -6,6 +6,12 @@ import time
 import threading
 import signal
 import sys
+import warnings
+import logging
+
+# Suppress httplib2 timeout warnings
+warnings.filterwarnings('ignore', message='.*httplib2.*timeout.*')
+logging.getLogger('google_auth_httplib2').setLevel(logging.ERROR)
 
 # Global flag to track if message was received
 message_received = False
