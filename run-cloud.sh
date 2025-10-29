@@ -11,5 +11,10 @@ sudo pip3 install -q -r requirements.txt >"$LOG" 2>&1 || {
   exit 1
 }
 python3 mars-cloud.py 
+
+echo "Monitor your Dataflow job status here:"
+echo "https://console.cloud.google.com/dataflow/jobs?project=$GOOGLE_CLOUD_PROJECT"
+
 read -p "Wait for Dataflow Job to Finish and then press enter"
 bq load mars.activities gs://"$GOOGLE_CLOUD_PROJECT""-bucket"/output/output*
+

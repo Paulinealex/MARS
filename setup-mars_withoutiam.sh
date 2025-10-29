@@ -51,16 +51,16 @@ gcloud services disable dataflow.googleapis.com --force >/dev/null 2>&1 || true
 gcloud services enable dataflow.googleapis.com >/dev/null 2>&1 || echo "WARN: Unable to enable Dataflow API (permissions may be restricted)"
 
 # Create service account (idempotent)
-echo "Creating service account 'marssa'..."
-if gcloud iam service-accounts describe "marssa@${PROJECT_ID}.iam.gserviceaccount.com" >/dev/null 2>&1; then
-    echo "VALIDATION: Service account marssa already exists, skipping create."
-else
-    gcloud iam service-accounts create marssa >/dev/null 2>&1 && echo "OK: Service account marssa created." || echo "WARN: Could not create service account (insufficient permissions?)"
-fi
+# echo "Creating service account 'marssa'..."
+# if gcloud iam service-accounts describe "marssa@${PROJECT_ID}.iam.gserviceaccount.com" >/dev/null 2>&1; then
+#     echo "VALIDATION: Service account marssa already exists, skipping create."
+# else
+#     gcloud iam service-accounts create marssa >/dev/null 2>&1 && echo "OK: Service account marssa created." || echo "WARN: Could not create service account (insufficient permissions?)"
+# fi
 
 # Note about IAM permissions
-echo "Note: IAM permissions may be restricted in this environment."
-echo "In production, the service account typically needs: roles/editor, roles/dataflow.worker, roles/iam.serviceAccountUser"
+#echo "Note: IAM permissions may be restricted in this environment."
+#echo "In production, the service account typically needs: roles/editor, roles/dataflow.worker, roles/iam.serviceAccountUser"
 
 # Create BigQuery dataset and tables (idempotent)
 echo "Creating BigQuery resources..."
@@ -84,7 +84,7 @@ echo "Starting MARS local processing pipeline..."
 
 # Executing the first script run-local.sh
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-bash -x "${SCRIPT_DIR}/run-local.sh"
+bash "${SCRIPT_DIR}/run-local.sh"
 
 # --- Automated post-run validations (best-effort; does not abort on failures) ---
 echo ""
@@ -170,8 +170,12 @@ echo ""
 # Executing the second script run-local.sh (absolute path)
 echo " Starting MARS cloud processing pipeline..."
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-bash -x "${SCRIPT_DIR}/run-cloud.sh"
+bash "${SCRIPT_DIR}/run-cloud.sh"
 
 echo ""
-echo " - cd streaming && ./run-stream-local.sh"
+# Executing the second script run-local.sh (absolute path)
+echo " Starting MARS cloud processing pipeline..."
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+bash -x "${SCRIPT_DIR}/streaming/run-stream-local.sh"
+
 echo " - cd streaming && ./run-stream-cloud.sh"
