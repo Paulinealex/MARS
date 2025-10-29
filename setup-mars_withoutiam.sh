@@ -75,8 +75,22 @@ bq mk --schema message:STRING -t "${PROJECT_ID}:mars.raw" >/dev/null 2>&1 || ech
 
 # Create Pub/Sub resources (idempotent)
 echo "Setting up Pub/Sub..."
-gcloud pubsub topics describe activities-topic >/dev/null 2>&1 || gcloud pubsub topics create activities-topic >/dev/null 2>&1 && echo "OK: activities-topic ready."
-gcloud pubsub subscriptions describe activities-subscription >/dev/null 2>&1 || gcloud pubsub subscriptions create activities-subscription --topic activities-topic >/dev/null 2>&1 && echo "OK: activities-subscription ready."
+
+# Try to subscribe to the shared moonbank-mars topic first (if accessible)
+echo "Attempting to subscribe to moonbank-mars topic..."
+if gcloud pubsub subscriptions create mars-activities --topic projects/moonbank-mars/topics/activities 2>/dev/null; then
+    echo "OK: Subscribed to shared moonbank-mars topic via mars-activities subscription"
+else
+    echo "Note: Could not access moonbank-mars topic. Creating local topic and subscriptions..."
+    
+    # Create local topic if moonbank-mars is not accessible
+    gcloud pubsub topics describe activities-topic >/dev/null 2>&1 || gcloud pubsub topics create activities-topic >/dev/null 2>&1 && echo "OK: activities-topic created."
+    
+    # Create both subscriptions pointing to local topic
+    gcloud pubsub subscriptions describe activities-subscription >/dev/null 2>&1 || gcloud pubsub subscriptions create activities-subscription --topic activities-topic >/dev/null 2>&1 && echo "OK: activities-subscription created."
+    
+    gcloud pubsub subscriptions describe mars-activities >/dev/null 2>&1 || gcloud pubsub subscriptions create mars-activities --topic activities-topic >/dev/null 2>&1 && echo "OK: mars-activities subscription created."
+fi
 
 echo "Setup complete with limited permissions!"
 echo "Note: Some operations may fail due to sandbox restrictions."
