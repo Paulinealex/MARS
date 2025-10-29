@@ -92,8 +92,8 @@ fi
 
 echo "Setup complete with limited permissions!"
 echo "Note: Some operations may fail due to sandbox restrictions."
-echo ""
-echo "Starting MARS local processing pipeline..."
+# echo ""
+# echo "Starting MARS local processing pipeline..."
 
 # # Executing the first script run-local.sh
 # SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"

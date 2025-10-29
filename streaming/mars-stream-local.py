@@ -21,7 +21,15 @@ def processline(line):
     global message_received_event
     outputrow = {'message' : line}
     print(f"✓ Message received and processed: {outputrow}")
-    message_received_event.set()  # Thread-safe way to signal message received
+    if not message_received_event.is_set():
+        message_received_event.set()  # Thread-safe way to signal message received
+        # Print success message immediately when first message is received
+        print(f"\n{'='*60}")
+        print("✓ SUCCESS: Pipeline is working correctly!")
+        print("  - Subscription read the published message")
+        print("  - Message was processed and written to BigQuery")
+        print("  - Pipeline will continue running until Ctrl+C")
+        print(f"{'='*60}\n")
     yield outputrow
 
 def publish_test_message(topic_name, delay_seconds=5):
@@ -41,31 +49,6 @@ def publish_test_message(topic_name, delay_seconds=5):
             print(f"\n✗ Failed to publish test message: {result.stderr}")
     except Exception as e:
         print(f"\n✗ Error publishing test message: {e}")
-
-def timeout_handler(timeout_seconds=15):
-    """Wait for message to be received within timeout period"""
-    global message_received_event
-    
-    # Wait up to timeout_seconds for the event to be set (this blocks until event or timeout)
-    received = message_received_event.wait(timeout=timeout_seconds)
-    
-    if received:
-        print(f"\n{'='*60}")
-        print("✓ SUCCESS: Pipeline is working correctly!")
-        print("  - Subscription read the published message")
-        print("  - Message was processed and written to BigQuery")
-        print("  - Pipeline will continue running until Ctrl+C")
-        print(f"{'='*60}\n")
-    else:
-        print(f"\n{'='*60}")
-        print(f"⚠ TIMEOUT: No messages received after {timeout_seconds} seconds")
-        print("  - Pipeline is running but no messages arrived")
-        print("  - Check if:")
-        print("    1. Subscription 'activities-subscription' exists")
-        print("    2. Topic has messages published to it")
-        print("    3. Subscription is pulling from correct topic")
-        print("  - Pipeline will continue running until Ctrl+C")
-        print(f"{'='*60}\n")
 
 def signal_handler(sig, frame):
     """Handle Ctrl+C gracefully"""
@@ -95,7 +78,6 @@ def run():
     print(f"Writing to BigQuery table: {outputtable}")
     print("\n" + "="*60)
     print("Publishing a test message in 5 seconds to verify pipeline...")
-    print("Waiting up to 15 seconds for message to be processed...")
     print("Press Ctrl+C to stop the pipeline")
     print("="*60 + "\n")
     
@@ -106,14 +88,6 @@ def run():
         daemon=True
     )
     test_thread.start()
-    
-    # Start timeout checker thread immediately - it will wait for the event
-    timeout_thread = threading.Thread(
-        target=timeout_handler,
-        args=(15,),
-        daemon=True
-    )
-    timeout_thread.start()
     
     (p
      | 'Read Messages' >> beam.io.ReadFromPubSub(subscription=subscription)
