@@ -67,22 +67,7 @@ def signal_handler(sig, frame):
         print("  - Messages were processed and written to BigQuery tables:")
         print("    • mars.raw (raw messages)")
         print("    • mars.activities (structured data)")
-        print(f"{'='*60}")
-    
-    # Show validation links
-    print(f"\n{'='*60}")
-    print("Validation Resources - Please verify data in:")
-    print(f"\n1. Pub/Sub Topic (activities-topic):")
-    print(f"   https://console.cloud.google.com/cloudpubsub/topic/detail/activities-topic?project={projectname}")
-    print(f"\n2. Pub/Sub Subscription (activities-subscription):")
-    print(f"   https://console.cloud.google.com/cloudpubsub/subscription/detail/activities-subscription?project={projectname}")
-    print(f"\n3. BigQuery Table - mars.raw (raw messages):")
-    print(f"   https://console.cloud.google.com/bigquery?project={projectname}&ws=!1m5!1m4!4m3!1s{projectname}!2smars!3sraw")
-    print(f"\n4. BigQuery Table - mars.activities (structured data):")
-    print(f"   https://console.cloud.google.com/bigquery?project={projectname}&ws=!1m5!1m4!4m3!1s{projectname}!2smars!3sactivities")
-    print(f"\n{'='*60}")
-    print("✓ Streaming pipeline completed successfully.")
-    print(f"{'='*60}\n")
+        print(f"{'='*60}\n")
     
     sys.exit(0)
 
@@ -112,7 +97,7 @@ def run():
     print(f"  BigQuery Tables: mars.raw, mars.activities")
     print(f"{'='*60}")
     print("\nWaiting for messages from Pub/Sub topic...")
-    print("Press Ctrl+C to stop the pipeline and view validation links")
+    print("Press Ctrl+C to stop the pipeline")
     print(f"{'='*60}\n")
     
     # Read messages from Pub/Sub
