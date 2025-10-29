@@ -11,7 +11,7 @@ def processline(line):
 def run():
     projectname = os.getenv('GOOGLE_CLOUD_PROJECT')
     bucketname = os.getenv('GOOGLE_CLOUD_PROJECT') + '-bucket'
-    jobname = 'mars-job-' + datetime.datetime.now().strftime("%Y%m%d%H%M")
+    jobname = 'mars-job-streaming' + datetime.datetime.now().strftime("%Y%m%d%H%M")
     region = 'us-central1'
 
     # https://cloud.google.com/dataflow/docs/reference/pipeline-options

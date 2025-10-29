@@ -278,4 +278,4 @@ echo ""
 # Executing the streaming on cloud
 echo "Starting MARS cloud streaming pipeline..."
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-bash "${SCRIPT_DIR}/streaming/run-stream-cloud.sh"
+bash -x "${SCRIPT_DIR}/streaming/run-stream-cloud.sh"
