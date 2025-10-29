@@ -186,10 +186,32 @@ echo "Note: Some operations may fail due to sandbox restrictions."
 # bash "${SCRIPT_DIR}/run-cloud.sh"
 
 echo ""
+echo ""
 # Executing the streaming local script
-echo " Starting MARS cloud processing pipeline..."
+echo "Starting MARS streaming pipeline..."
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-bash "${SCRIPT_DIR}/streaming/run-stream-local.sh"
+
+# Start streaming pipeline in background
+bash "${SCRIPT_DIR}/streaming/run-stream-local.sh" &
+STREAM_PID=$!
+
+echo ""
+echo "Waiting 10 seconds for streaming pipeline to initialize..."
+sleep 10
+
+echo ""
+echo "Publishing sample banking activity data..."
+bash "${SCRIPT_DIR}/streaming/publish-sample-data.sh" 20
+
+echo ""
+echo "Sample data published. Streaming pipeline is still running (PID: ${STREAM_PID})"
+echo "Press Ctrl+C to stop the pipeline, or run: kill ${STREAM_PID}"
+echo ""
+echo "To publish more messages manually, run:"
+echo "  bash streaming/publish-sample-data.sh [NUM_MESSAGES]"
+
+# Wait for streaming pipeline (foreground it)
+wait $STREAM_PID
 
 # echo ""
 # # Executing the streaming cloud script
