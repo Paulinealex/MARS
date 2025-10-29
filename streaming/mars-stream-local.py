@@ -71,7 +71,7 @@ def signal_handler(sig, frame):
     
     # Show validation links
     print(f"\n{'='*60}")
-    print("Validation Resources:")
+    print("Validation Resources - Please verify data in:")
     print(f"\n1. Pub/Sub Topic (activities-topic):")
     print(f"   https://console.cloud.google.com/cloudpubsub/topic/detail/activities-topic?project={projectname}")
     print(f"\n2. Pub/Sub Subscription (activities-subscription):")
@@ -80,19 +80,9 @@ def signal_handler(sig, frame):
     print(f"   https://console.cloud.google.com/bigquery?project={projectname}&ws=!1m5!1m4!4m3!1s{projectname}!2smars!3sraw")
     print(f"\n4. BigQuery Table - mars.activities (structured data):")
     print(f"   https://console.cloud.google.com/bigquery?project={projectname}&ws=!1m5!1m4!4m3!1s{projectname}!2smars!3sactivities")
+    print(f"\n{'='*60}")
+    print("✓ Streaming pipeline completed successfully.")
     print(f"{'='*60}\n")
-    
-    # Ask for validation confirmation
-    try:
-        response = input("Have you verified the data in BigQuery tables? (y/n): ").strip().lower()
-        if response in ['y', 'yes']:
-            print("\n✓ Validation confirmed. Streaming pipeline completed successfully.")
-        elif response in ['n', 'no']:
-            print("\n⚠ Validation not confirmed. Please check the BigQuery tables above.")
-        else:
-            print("\n⚠ Invalid response.")
-    except (EOFError, KeyboardInterrupt):
-        print("\n")
     
     sys.exit(0)
 

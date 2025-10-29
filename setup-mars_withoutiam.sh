@@ -204,17 +204,30 @@ echo "Publishing sample banking activity data..."
 bash "${SCRIPT_DIR}/streaming/publish-sample-data.sh" 20
 
 echo ""
-echo "Sample data published. Streaming pipeline is still running (PID: ${STREAM_PID})"
-echo "Press Ctrl+C to stop the pipeline, or run: kill ${STREAM_PID}"
+echo "============================================================"
+echo "✓ Sample data published successfully!"
+echo "============================================================"
 echo ""
-echo "To publish more messages manually, run:"
+echo "Streaming pipeline is running in background (PID: ${STREAM_PID})"
+echo ""
+echo "To view the pipeline output:"
+echo "  - Check the terminal for message processing logs"
+echo "  - Press Ctrl+C in the streaming terminal to stop and see validation links"
+echo ""
+echo "To publish more messages:"
 echo "  bash streaming/publish-sample-data.sh [NUM_MESSAGES]"
+echo ""
+echo "To stop the streaming pipeline:"
+echo "  kill ${STREAM_PID}"
+echo ""
+echo "============================================================"
+echo "✓ MARS setup and initial streaming completed!"
+echo "============================================================"
+echo ""
 
-# Wait for streaming pipeline (foreground it)
-wait $STREAM_PID
 
-# echo ""
-# # Executing the streaming cloud script
-# echo " Starting MARS cloud processing pipeline..."
-# SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-# bash "${SCRIPT_DIR}/streaming/run-stream-cloud.sh"
+echo ""
+# Executing the streaming on cloud
+echo " Starting MARS cloud processing pipeline..."
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+bash "${SCRIPT_DIR}/streaming/run-stream-cloud.sh"
