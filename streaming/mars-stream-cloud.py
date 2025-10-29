@@ -66,7 +66,7 @@ def run():
     print(f"Job Name: {jobname}")
     print(f"Subscription: activities-subscription")
     print(f"Writing to tables: mars.raw, mars.activities")
-    print(f"Monitor job at: https://console.cloud.google.com/dataflow/jobs/{region}/{jobname}?project={projectname}")
+    print(f"Monitor job at: https://console.cloud.google.com/dataflow/jobs?project={projectname}")
     
     # Read messages from Pub/Sub
     messages = p | 'Read Messages' >> beam.io.ReadFromPubSub(subscription=subscription)
@@ -92,7 +92,7 @@ def run():
     print(f"  Region: {region}")
     print("")
     print("Monitor your Dataflow job:")
-    print(f"  https://console.cloud.google.com/dataflow/jobs/{region}/{jobname}?project={projectname}")
+    print(f"  https://console.cloud.google.com/dataflow/jobs?project={projectname}")
     print("")
     print("View BigQuery tables:")
     print(f"  mars.raw: https://console.cloud.google.com/bigquery?project={projectname}&ws=!1m5!1m4!4m3!1s{projectname}!2smars!3sraw")
