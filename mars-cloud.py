@@ -13,7 +13,7 @@ def run():
     region = 'us-central1'
 
     # Use the specific service account email
-    service_account_email = "221165152849-compute@developer.gserviceaccount.com"
+    #service_account_email = "221165152849-compute@developer.gserviceaccount.com"
 
     # https://cloud.google.com/dataflow/docs/reference/pipeline-options
     argv = [
@@ -25,7 +25,7 @@ def run():
       '--temp_location=gs://' + bucketname + '/temploc/',
       '--max_num_workers=2',
       '--machine_type=e2-standard-2',
-      '--service_account_email=' + service_account_email,
+      #'--service_account_email=' + service_account_email,
       '--save_main_session'
     ]
 
