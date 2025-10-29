@@ -97,95 +97,95 @@ echo "Note: Some operations may fail due to sandbox restrictions."
 echo ""
 echo "Starting MARS local processing pipeline..."
 
-# Executing the first script run-local.sh
-SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-bash "${SCRIPT_DIR}/run-local.sh"
+# # Executing the first script run-local.sh
+# SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+# bash "${SCRIPT_DIR}/run-local.sh"
 
-# --- Automated post-run validations (best-effort; does not abort on failures) ---
-echo ""
-echo "Running post-run validations..."
-set +e
-FAILS=0
+# # --- Automated post-run validations (best-effort; does not abort on failures) ---
+# echo ""
+# echo "Running post-run validations..."
+# set +e
+# FAILS=0
 
-# 1) Validate local output produced
-if [ -d "${SCRIPT_DIR}/output" ] && [ "$(ls -A "${SCRIPT_DIR}/output" 2>/dev/null)" ]; then
-    echo "VALIDATION: Local output directory exists and is not empty."
-else
-    echo "VALIDATION FAILED: Local output missing or empty."
-    FAILS=$((FAILS+1))
-fi
+# # 1) Validate local output produced
+# if [ -d "${SCRIPT_DIR}/output" ] && [ "$(ls -A "${SCRIPT_DIR}/output" 2>/dev/null)" ]; then
+#     echo "VALIDATION: Local output directory exists and is not empty."
+# else
+#     echo "VALIDATION FAILED: Local output missing or empty."
+#     FAILS=$((FAILS+1))
+# fi
 
-# 2) Validate files uploaded to GCS bucket/local/
-if gcloud storage ls "gs://${PROJECT_ID}-bucket/local/" >/dev/null 2>&1; then
-    count=$(gcloud storage ls "gs://${PROJECT_ID}-bucket/local/" --format="value(name)" 2>/dev/null | wc -l)
-    if [ "${count}" -gt 0 ]; then
-        echo "VALIDATION: GCS upload succeeded — ${count} objects found in gs://${PROJECT_ID}-bucket/local/."
-    else
-        echo "VALIDATION WARNING: GCS path exists but contains no objects."
-        FAILS=$((FAILS+1))
-    fi
-else
-    echo "VALIDATION WARNING: Unable to list gs://${PROJECT_ID}-bucket/local/ (may not exist or permission denied)."
-    FAILS=$((FAILS+1))
-fi
+# # 2) Validate files uploaded to GCS bucket/local/
+# if gcloud storage ls "gs://${PROJECT_ID}-bucket/local/" >/dev/null 2>&1; then
+#     count=$(gcloud storage ls "gs://${PROJECT_ID}-bucket/local/" --format="value(name)" 2>/dev/null | wc -l)
+#     if [ "${count}" -gt 0 ]; then
+#         echo "VALIDATION: GCS upload succeeded — ${count} objects found in gs://${PROJECT_ID}-bucket/local/."
+#     else
+#         echo "VALIDATION WARNING: GCS path exists but contains no objects."
+#         FAILS=$((FAILS+1))
+#     fi
+# else
+#     echo "VALIDATION WARNING: Unable to list gs://${PROJECT_ID}-bucket/local/ (may not exist or permission denied)."
+#     FAILS=$((FAILS+1))
+# fi
 
-# 3) Validate BigQuery table and row count (best-effort)
-if bq --project_id="${PROJECT_ID}" show --format=prettyjson "${PROJECT_ID}:mars.activities" >/dev/null 2>&1; then
-    rows=$(bq --project_id="${PROJECT_ID}" query --nouse_legacy_sql --format=csv "SELECT COUNT(*) FROM \`${PROJECT_ID}.mars.activities\`" 2>/dev/null | tail -n1)
-    if [[ "${rows}" == "" ]]; then
-        echo "VALIDATION: BigQuery table exists but row count could not be determined."
-    else
-        echo "VALIDATION: BigQuery table mars.activities exists — row count: ${rows}"
-    fi
-else
-    echo "VALIDATION WARNING: BigQuery table mars.activities not accessible or missing."
-    FAILS=$((FAILS+1))
-fi
+# # 3) Validate BigQuery table and row count (best-effort)
+# if bq --project_id="${PROJECT_ID}" show --format=prettyjson "${PROJECT_ID}:mars.activities" >/dev/null 2>&1; then
+#     rows=$(bq --project_id="${PROJECT_ID}" query --nouse_legacy_sql --format=csv "SELECT COUNT(*) FROM \`${PROJECT_ID}.mars.activities\`" 2>/dev/null | tail -n1)
+#     if [[ "${rows}" == "" ]]; then
+#         echo "VALIDATION: BigQuery table exists but row count could not be determined."
+#     else
+#         echo "VALIDATION: BigQuery table mars.activities exists — row count: ${rows}"
+#     fi
+# else
+#     echo "VALIDATION WARNING: BigQuery table mars.activities not accessible or missing."
+#     FAILS=$((FAILS+1))
+# fi
 
-# Summary of automated validations
-if [ "${FAILS}" -eq 0 ]; then
-    echo ""
-    echo "All automated post-run validations passed."
-else
-    echo ""
-    echo "Automated post-run validations completed with ${FAILS} issues reported."
-fi
-set -e
+# # Summary of automated validations
+# if [ "${FAILS}" -eq 0 ]; then
+#     echo ""
+#     echo "All automated post-run validations passed."
+# else
+#     echo ""
+#     echo "Automated post-run validations completed with ${FAILS} issues reported."
+# fi
+# set -e
 
-# --- First-run GUI checklist specific to run-local.sh ---
-cat <<EOF
+# # --- First-run GUI checklist specific to run-local.sh ---
+# cat <<EOF
 
-First-run GUI Validation Checklist (manual)
-Please verify these items in the Cloud Console for the first run of run-local.sh:
+# First-run GUI Validation Checklist (manual)
+# Please verify these items in the Cloud Console for the first run of run-local.sh:
 
-1) GCS upload
-   - Confirm objects exist at: gs://${PROJECT_ID}-bucket/local/
-     Console URL:
-     https://console.cloud.google.com/storage/browser/${PROJECT_ID}-bucket/local/?project=${PROJECT_ID}
+# 1) GCS upload
+#    - Confirm objects exist at: gs://${PROJECT_ID}-bucket/local/
+#      Console URL:
+#      https://console.cloud.google.com/storage/browser/${PROJECT_ID}-bucket/local/?project=${PROJECT_ID}
 
-2) BigQuery load
-   - Confirm table 'mars.activities' exists and contains rows:
-     Console URL:
-     https://console.cloud.google.com/bigquery?project=${PROJECT_ID}
+# 2) BigQuery load
+#    - Confirm table 'mars.activities' exists and contains rows:
+#      Console URL:
+#      https://console.cloud.google.com/bigquery?project=${PROJECT_ID}
 
-After checking the 3 items above in the Console, confirm below to continue.
-EOF
+# After checking the 3 items above in the Console, confirm below to continue.
+# EOF
 
-# prompt and wait for user confirmation (manual GUI checks)
-while true; do
-    read -r -p "Have you verified the first-run GUI checklist items above? (y/n): " RESP2
-    case "$RESP2" in
-        [Yy]) echo "User confirmed GUI validations."; break ;;
-        [Nn]) echo "Please complete the GUI checks and re-run this script when ready."; exit 0 ;;
-        *) echo "Please answer y or n." ;;
-    esac
-done
+# # prompt and wait for user confirmation (manual GUI checks)
+# while true; do
+#     read -r -p "Have you verified the first-run GUI checklist items above? (y/n): " RESP2
+#     case "$RESP2" in
+#         [Yy]) echo "User confirmed GUI validations."; break ;;
+#         [Nn]) echo "Please complete the GUI checks and re-run this script when ready."; exit 0 ;;
+#         *) echo "Please answer y or n." ;;
+#     esac
+# done
 
-echo ""
-# Executing the second script run-local.sh (absolute path)
-echo " Starting MARS cloud processing pipeline..."
-SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-bash "${SCRIPT_DIR}/run-cloud.sh"
+# echo ""
+# # Executing the second script run-local.sh (absolute path)
+# echo " Starting MARS cloud processing pipeline..."
+# SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+# bash "${SCRIPT_DIR}/run-cloud.sh"
 
 echo ""
 # Executing the second script run-local.sh (absolute path)
