@@ -25,6 +25,7 @@ echo "Project Name: $PROJECT_ID"
 
 echo "Project Name: $PROJECT_ID"
 
+echo "Setting up MARS environment for all the tasks involved"
 # Create bucket with soft delete disabled and handle existing-bucket case
 echo "Creating GCS bucket..."
 if gcloud storage buckets describe "gs://${PROJECT_ID}-bucket" >/dev/null 2>&1; then
@@ -199,5 +200,5 @@ echo ""
 # Executing the streaming on cloud
 echo "Starting MARS streaming pipeline on cloud..."
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-bash -x "${SCRIPT_DIR}/streaming/run-stream-cloud.sh" &
+bash "${SCRIPT_DIR}/streaming/run-stream-cloud.sh" &
 STREAM_CLOUD_PID=$!
